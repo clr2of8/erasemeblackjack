@@ -44,6 +44,10 @@ class Deck:
     
     def deal(self):
         """Deals a card from the deck."""
+        if not self.cards:
+            # Reshuffle if deck is empty
+            self.__init__()
+            self.shuffle()
         return self.cards.pop()
 
 
@@ -115,8 +119,21 @@ class BlackjackGame:
         self.player_hand.display()
         
         # Check for player blackjack
-        if self.player_hand.get_value() == 21:
+        player_blackjack = self.player_hand.get_value() == 21
+        dealer_blackjack = self.dealer_hand.get_value() == 21
+        
+        if player_blackjack and dealer_blackjack:
+            print("\nDealer's hand:")
+            self.dealer_hand.display()
+            print("\nBoth have Blackjack! It's a tie!")
+            return
+        elif player_blackjack:
             print("\nBlackjack! You win!")
+            return
+        elif dealer_blackjack:
+            print("\nDealer's hand:")
+            self.dealer_hand.display()
+            print("\nDealer has Blackjack! You lose.")
             return
         
         # Player's turn
