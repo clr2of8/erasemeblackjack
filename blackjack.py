@@ -120,7 +120,8 @@ class BlackjackGame:
                 self.bet = 100
             else:
                 try:
-                    self.bet = int(bet_input)
+                    bet_value = float(bet_input)
+                    self.bet = int(bet_value)
                 except ValueError:
                     print("Invalid bet. Please enter a number.")
                     continue
@@ -161,7 +162,7 @@ class BlackjackGame:
             print(f"Your bet of ${self.bet} is returned.")
             return True
         elif player_blackjack:
-            winnings = int(self.bet * 1.5)  # Blackjack pays 3:2
+            winnings = round(self.bet * 1.5)  # Blackjack pays 3:2, rounded to nearest dollar
             self.balance += winnings
             print(f"\nBlackjack! You win ${winnings}!")
             print(f"Your new balance: ${self.balance}")
