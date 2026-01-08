@@ -24,6 +24,51 @@ class Card:
             return 11  # Aces are worth 11 by default, adjusted in hand calculation
         else:
             return int(self.rank)
+    
+    def _get_suit_symbol(self):
+        """Returns the Unicode symbol for the card's suit."""
+        symbols = {
+            'Hearts': '♥',
+            'Diamonds': '♦',
+            'Clubs': '♣',
+            'Spades': '♠'
+        }
+        return symbols.get(self.suit, '?')
+    
+    def _get_rank_display(self):
+        """Returns the display string for the card's rank."""
+        if self.rank == 'Jack':
+            return 'J'
+        elif self.rank == 'Queen':
+            return 'Q'
+        elif self.rank == 'King':
+            return 'K'
+        elif self.rank == 'Ace':
+            return 'A'
+        else:
+            return self.rank
+    
+    def get_ascii_lines(self):
+        """Returns the card as ASCII art lines."""
+        suit_symbol = self._get_suit_symbol()
+        rank_display = self._get_rank_display()
+        
+        # Adjust spacing based on rank length
+        if len(rank_display) == 2:  # '10'
+            rank_line = f"{rank_display}      "
+        else:
+            rank_line = f"{rank_display}       "
+        
+        lines = [
+            "┌─────────┐",
+            f"│{rank_line}│",
+            "│         │",
+            f"│    {suit_symbol}    │",
+            "│         │",
+            f"│{rank_line}│",
+            "└─────────┘"
+        ]
+        return lines
 
 
 class Deck:
@@ -79,14 +124,42 @@ class Hand:
         return value
     
     def display(self, hide_first=False):
-        """Displays the hand."""
+        """Displays the hand as ASCII art."""
+        # Create a hidden card ASCII art
+        hidden_card_lines = [
+            "┌─────────┐",
+            "│░░░░░░░░░│",
+            "│░░░░░░░░░│",
+            "│░░░░░░░░░│",
+            "│░░░░░░░░░│",
+            "│░░░░░░░░░│",
+            "└─────────┘"
+        ]
+        
+        # Collect all card line arrays
+        card_lines_list = []
+        
         if hide_first:
-            print(f"  [Hidden]")
+            # Add hidden card
+            card_lines_list.append(hidden_card_lines)
+            # Add visible cards
             for card in self.cards[1:]:
-                print(f"  {card}")
+                card_lines_list.append(card.get_ascii_lines())
         else:
+            # Add all cards
             for card in self.cards:
-                print(f"  {card}")
+                card_lines_list.append(card.get_ascii_lines())
+        
+        # Print cards side by side
+        if card_lines_list:
+            for line_index in range(7):  # 7 lines per card
+                line_parts = []
+                for card_lines in card_lines_list:
+                    line_parts.append(card_lines[line_index])
+                print("  " + "  ".join(line_parts))
+        
+        # Print value if not hiding
+        if not hide_first:
             print(f"  Value: {self.get_value()}")
 
 
