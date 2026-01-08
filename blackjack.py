@@ -9,6 +9,9 @@ import random
 class Card:
     """Represents a playing card."""
     
+    CARD_WIDTH = 9  # Width of the card interior
+    CARD_HEIGHT = 7  # Number of lines in ASCII art
+    
     def __init__(self, suit, rank):
         self.suit = suit
         self.rank = rank
@@ -54,10 +57,8 @@ class Card:
         rank_display = self._get_rank_display()
         
         # Adjust spacing based on rank length
-        if len(rank_display) == 2:  # '10'
-            rank_line = f"{rank_display}      "
-        else:
-            rank_line = f"{rank_display}       "
+        padding = ' ' * (self.CARD_WIDTH - 1 - len(rank_display))
+        rank_line = f"{rank_display}{padding}"
         
         lines = [
             "┌─────────┐",
@@ -152,7 +153,7 @@ class Hand:
         
         # Print cards side by side
         if card_lines_list:
-            for line_index in range(7):  # 7 lines per card
+            for line_index in range(Card.CARD_HEIGHT):
                 line_parts = []
                 for card_lines in card_lines_list:
                     line_parts.append(card_lines[line_index])
