@@ -93,16 +93,48 @@ class Hand:
 class BlackjackGame:
     """Represents a Blackjack game."""
     
-    def __init__(self):
+    def __init__(self, balance=1000):
         self.deck = Deck()
         self.player_hand = Hand()
         self.dealer_hand = Hand()
+        self.balance = balance
+        self.bet = 0
     
     def play(self):
         """Plays a round of Blackjack."""
         print("\n" + "="*50)
         print("Welcome to Blackjack!")
         print("="*50)
+        
+        # Display balance and place bet
+        print(f"\nYour balance: ${self.balance}")
+        
+        if self.balance <= 0:
+            print("\nYou're out of money! Game over.")
+            return False
+        
+        # Get bet amount (default to $100)
+        while True:
+            bet_input = input(f"\nEnter your bet amount (default $100): ").strip()
+            if bet_input == "":
+                self.bet = 100
+            else:
+                try:
+                    self.bet = int(bet_input)
+                except ValueError:
+                    print("Invalid bet. Please enter a number.")
+                    continue
+            
+            if self.bet <= 0:
+                print("Bet must be positive.")
+                continue
+            elif self.bet > self.balance:
+                print(f"You don't have enough money. Your balance is ${self.balance}.")
+                continue
+            else:
+                break
+        
+        print(f"Bet placed: ${self.bet}")
         
         # Shuffle and deal
         self.deck.shuffle()
@@ -126,15 +158,21 @@ class BlackjackGame:
             print("\nDealer's hand:")
             self.dealer_hand.display()
             print("\nBoth have Blackjack! It's a tie!")
-            return
+            print(f"Your bet of ${self.bet} is returned.")
+            return True
         elif player_blackjack:
-            print("\nBlackjack! You win!")
-            return
+            winnings = int(self.bet * 1.5)  # Blackjack pays 3:2
+            self.balance += winnings
+            print(f"\nBlackjack! You win ${winnings}!")
+            print(f"Your new balance: ${self.balance}")
+            return True
         elif dealer_blackjack:
             print("\nDealer's hand:")
             self.dealer_hand.display()
-            print("\nDealer has Blackjack! You lose.")
-            return
+            self.balance -= self.bet
+            print(f"\nDealer has Blackjack! You lose ${self.bet}.")
+            print(f"Your new balance: ${self.balance}")
+            return True
         
         # Player's turn
         while True:
@@ -146,8 +184,10 @@ class BlackjackGame:
                 self.player_hand.display()
                 
                 if self.player_hand.get_value() > 21:
-                    print("\nBust! You lose.")
-                    return
+                    self.balance -= self.bet
+                    print(f"\nBust! You lose ${self.bet}.")
+                    print(f"Your new balance: ${self.balance}")
+                    return True
                 elif self.player_hand.get_value() == 21:
                     break
             elif choice == 's':
@@ -171,26 +211,46 @@ class BlackjackGame:
         
         print("\n" + "="*50)
         if dealer_value > 21:
-            print("Dealer busts! You win!")
+            self.balance += self.bet
+            print(f"Dealer busts! You win ${self.bet}!")
+            print(f"Your new balance: ${self.balance}")
         elif player_value > dealer_value:
-            print(f"You win! ({player_value} vs {dealer_value})")
+            self.balance += self.bet
+            print(f"You win ${self.bet}! ({player_value} vs {dealer_value})")
+            print(f"Your new balance: ${self.balance}")
         elif player_value < dealer_value:
-            print(f"Dealer wins! ({dealer_value} vs {player_value})")
+            self.balance -= self.bet
+            print(f"Dealer wins! You lose ${self.bet}. ({dealer_value} vs {player_value})")
+            print(f"Your new balance: ${self.balance}")
         else:
             print(f"It's a tie! ({player_value})")
+            print(f"Your bet of ${self.bet} is returned.")
         print("="*50)
+        return True
 
 
 def main():
     """Main function to run the game."""
+    game = BlackjackGame()
+    
     while True:
-        game = BlackjackGame()
-        game.play()
+        continue_game = game.play()
+        
+        if not continue_game or game.balance <= 0:
+            if game.balance <= 0:
+                print("\nYou're out of money! Thanks for playing!")
+            else:
+                print("\nThanks for playing!")
+            break
         
         play_again = input("\nWould you like to play again? (y/n) ").lower()
         if play_again != 'y':
-            print("\nThanks for playing!")
+            print(f"\nYou're leaving with ${game.balance}. Thanks for playing!")
             break
+        
+        # Reset hands for next round
+        game.player_hand = Hand()
+        game.dealer_hand = Hand()
 
 
 if __name__ == "__main__":
